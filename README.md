@@ -170,3 +170,21 @@ Set `DEBUG_LOGS_ACTIVE=true` in `.env` to enable debug logs.
 * Includes resilience fallback for AI failures (static message)
 
 ---
+
+### Next moves
+
+If this were production-bound or part of a longer sprint, here’s what I would have prioritized next:
+
+* **Unit and Integration Tests**: Set up testing with Jest for services and controller layers. I’d stub API calls (Mapbox, OpenAI, Twilio) using a provider pattern to isolate behavior.
+
+* **Structured Logging**: Centralize and tag logs by request ID or delivery ID for observability. I’d also integrate something like Datadog or Logtail for real-time monitoring.
+
+* **Validation & Error Handling**: Add class-validator to DTOs and enforce stricter types on external responses (e.g., Mapbox and OpenAI typings).
+
+* **Job State Tracking**: Persist a `notificationsSent` history table or message audit trail to prevent duplicates or provide context for support/debugging.
+
+* **Retry and Circuit Breakers**: Wrap external API calls (especially OpenAI) in retry logic with exponential backoff and fallback paths.
+
+* **Security**: Set up request signing for the scheduler trigger route, and cleanly separate config loading using a typed config service pattern.
+
+Let me know if you'd like me to walk through the implementation in detail or discuss potential next steps. Thanks for the opportunity - this was a fun challenge.
