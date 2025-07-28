@@ -4,6 +4,7 @@ import { Delivery } from '../models/delivery.model';
 import { TrafficService } from 'src/common/traffic.service';
 import { AiService } from 'src/common/ai.service';
 import { NotificationService } from '../common/notification.service';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class SchedulerService {
@@ -13,15 +14,14 @@ export class SchedulerService {
     private readonly notify: NotificationService,
   ) {}
 
-  // @Cron(`*/${process.env.CHECK_INTERVAL_MINUTES || 5} * * * *`)
+  @Cron(CronExpression.EVERY_5_MINUTES)
   async checkTrafficConditions(): Promise<void> {
     const deliveries: Delivery[] = await Delivery.findAll({
       where: { delivered: false },
     });
     logger.info(`Processing ${deliveries.length} deliveries`);
 
-    // const tasks = deliveries.map(async (delivery) => {
-    for (const delivery of deliveries) {
+    const tasks = deliveries.map(async (delivery) => {
       const delayMinutes = await this.traffic.getDelay(delivery.origin, delivery.destination);
       const previousDelay = delivery.lastKnownDelay ?? null;
 
@@ -63,8 +63,7 @@ export class SchedulerService {
 
       // Always update the new delay in DB
       await delivery.update({ lastKnownDelay: delayMinutes });
-    }
-    // });
-    // await Promise.all(tasks);
+    });
+    await Promise.all(tasks);
   }
 }
